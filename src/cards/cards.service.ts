@@ -17,10 +17,10 @@ export class CardsService {
     public async createCard(dto: CreateCardDto, token?: string) {
         this.logger.log('Criando card');
         //Aguardando autenticação,
-        // const user = await this.checkUser(token);
+        const user = await this.checkUser(token);
         
         try {
-            // const userId = user.email;
+            const userId = user.email;
             const cardId = uuid.v7();
             const now = new Date();
             const createdAt = Timestamp.fromDate(now);
@@ -31,7 +31,7 @@ export class CardsService {
                 imageUrl: dto.imageUrl,
                 title: dto.title,
                 description: dto.description,
-                // userId: userId
+                userId: userId
             }
 
             this.logger.warn(`Enviando ${cardId} para Firestore`)
@@ -52,7 +52,7 @@ export class CardsService {
     public async getCards(token?: string) {
         this.logger.log('Resgatando cards');
         //Aguardando autenticação
-        // await this.checkUser(token);
+        await this.checkUser(token);
         try {
             const cards = await this.firestore
                 .collection('cards')
@@ -72,12 +72,12 @@ export class CardsService {
     public async deleteCard(dto: DeleteCardDto, token?: string) {
         this.logger.log(`Deletando card ${dto.cardId}`)
         //Aguardando autenticação
-        // const user = await this.checkUser(token);
+        const user = await this.checkUser(token);
         try {
             const card = await this.firestore
                 .collection('cards')
                 .where('cardId','==',dto.cardId)
-                // .where('userId','==',user.email)
+                .where('userId','==',user.email)
                 .get();
         
                 if(card.empty){
@@ -105,7 +105,7 @@ export class CardsService {
         this.logger.log(`Atualizando card ${dto.cardId}`)
 
         //Aguardando autenticação
-        // const user = await this.checkUser(token);
+        const user = await this.checkUser(token);
 
         if(!dto.cardId) {
             const errorMessage = `CardId não fornecido`;
@@ -119,7 +119,7 @@ export class CardsService {
             const cards = await this.firestore
                 .collection('cards')
                 .where('cardId','==',dto.cardId)
-                // .where('userId','==',user.email)
+                .where('userId','==',user.email)
                 .get();
         
                 if(cards.empty){
@@ -138,7 +138,7 @@ export class CardsService {
                 const cardsUpdateds = await this.firestore
                     .collection('cards')
                     .where('cardId','==',dto.cardId)
-                    // .where('userId','==',user.email)
+                    .where('userId','==',user.email)
                     .get();
 
                 const card = cardsUpdateds.docs[0].data();
@@ -170,10 +170,6 @@ export class CardsService {
         } catch(error) {
             this.logger.error(error);
             throw new HttpException('Não foi possível autenticar o usuário', HttpStatus.FORBIDDEN)
-        }
-
-      
-
-       
+        }       
     }
 }
